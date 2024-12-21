@@ -28,7 +28,14 @@ pinecone_key = st.secrets["PINECONE_API_KEY"]
 pc = Pinecone(api_key=pinecone_key)
 OpenAI_Key = st.secrets["OPENAI_API_KEY"]
 index = pc.Index("skpllmindex2")
-loaded=False
+
+def run_once(f):
+    def wrapper(*args, **kwargs):
+        if not wrapper.has_run:
+            wrapper.has_run = True
+            return f(*args, **kwargs)
+    wrapper.has_run = False
+    return wrapper
 
 def create_embeddings(chunks:list[Document]):
     model_name = "BAAI/bge-large-en-v1.5"
@@ -105,6 +112,15 @@ def process_documents():
 
     return txt_splitters.split_documents(docs)
 
+@run_once
+def prepare_pinecone():
+    chunks = process_documents() #Created document chunks
+    chunk_texts =  list(map(lambda d:d.page_content, chunks))
+    embeddings = create_embeddings(chunk_texts)
+    data_with_meta_data = combine_vector_and_text(chunk_texts, embeddings) 
+    upsert_data_to_pinecone(data_with_metadata= data_with_meta_data)
+    st.write("Data Inserted into Vector DB")
+
 def chat_with_llm(context_documents,query):
     values = context_documents["matches"]
     context = "\n".join([value['metadata']['text'] for value in values])
@@ -133,15 +149,7 @@ if __name__== "__main__":
     st.header("What has Sundarkp worked on?")
     st.subheader("An attempt to know with RAG powered by LLM")
 
-    if not loaded:
-        collection_name="SKP_Profile_Collection"
-        chunks = process_documents() #Created document chunks
-        chunk_texts =  list(map(lambda d:d.page_content, chunks))
-        embeddings = create_embeddings(chunk_texts)
-        data_with_meta_data = combine_vector_and_text(chunk_texts, embeddings) 
-        upsert_data_to_pinecone(data_with_metadata= data_with_meta_data)
-        st.write("Data Inserted into Vector DB")
-        loaded=True
+    prepare_pinecone()
 
     with st.sidebar:
         query = st.text_input("Query : ", "What domains he has worked on")
