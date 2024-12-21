@@ -26,9 +26,13 @@ At the end of the conversation, respond with
 
 
 hide_github_icon = """
-#GithubIcon {
-  visibility: hidden;
-}
+<style>
+    .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
+    .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
+    .viewerBadge_text__1JaDK {
+        display: none;
+    }
+    </style>
 """
 
 pinecone_key = st.secrets["PINECONE_API_KEY"]
@@ -156,7 +160,7 @@ def chat_with_llm(context_documents,query):
 if __name__== "__main__":
     st.set_page_config(page_title="Sundarkp's Profile")
     st.markdown(hide_github_icon, unsafe_allow_html=True)
-    
+
     st.header("What has Sundarkp worked on?")
     st.subheader("An attempt to know with RAG powered by LLM")
 
