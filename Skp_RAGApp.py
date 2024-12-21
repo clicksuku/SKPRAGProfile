@@ -28,6 +28,7 @@ pinecone_key = st.secrets["PINECONE_API_KEY"]
 pc = Pinecone(api_key=pinecone_key)
 OpenAI_Key = st.secrets["OPENAI_API_KEY"]
 index = pc.Index("skpllmindex2")
+loaded=False
 
 def create_embeddings(chunks:list[Document]):
     model_name = "BAAI/bge-large-en-v1.5"
@@ -93,7 +94,7 @@ def query_pinecone_index(
 
 #change it to read from URL into Stream and read from stream here
 def process_documents():
-    st.write("Entered Processing Documents")
+    st.write("Entered Processing Documents......")
     loader = PyPDFDirectoryLoader("./")
     docs = loader.load()
     txt_splitters = RecursiveCharacterTextSplitter(
@@ -128,28 +129,28 @@ def chat_with_llm(context_documents,query):
 
 
 if __name__== "__main__":
-    st.set_page_config(page_title="RAG and Local LLM on Sundarkp's Resume")
-    st.header("A simple attempt to leverage rag")
+    st.set_page_config(page_title="Sundarkp's Profile")
+    st.header("What has Sundarkp worked on?")
+    st.subheader("An attempt to know with RAG powered by LLM")
 
-    collection_name="SKP_Profile_Collection"
-    embeddings = ""
-    chunks = ""
-    chunk_texts = ""
-    query = ""
-
-    with st.sidebar:
-        st.header("Press the Process Button to load my profile into rag\n")
-        process = st.button("Process")
-        query = st.text_input("Query : ", "What domains he has worked on")
-        ask = st.button("Query")
-
-    if(process):
+    if not loaded:
+        collection_name="SKP_Profile_Collection"
         chunks = process_documents() #Created document chunks
         chunk_texts =  list(map(lambda d:d.page_content, chunks))
         embeddings = create_embeddings(chunk_texts)
         data_with_meta_data = combine_vector_and_text(chunk_texts, embeddings) 
         upsert_data_to_pinecone(data_with_metadata= data_with_meta_data)
         st.write("Data Inserted into Vector DB")
+        loaded=True
+
+    with st.sidebar:
+        query = st.text_input("Query : ", "What domains he has worked on")
+        ask = st.button("Query")
+        st.write("Few Sample Queries: ")
+        st.write(" 1. What domains Sundar has worked on?")
+        st.write(" 2. What Technologies Sundar has worked on?")
+        st.write(" 3. What did he accomplish at CaratLane?")
+        st.write(" 4. Will Sundar be a good fit to work in FinTech?")
     
     if(ask):
         query_embeddings = create_embeddings_for_query(query)
