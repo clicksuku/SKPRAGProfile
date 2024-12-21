@@ -24,10 +24,19 @@ Begin the conversation with a warm greeting.
 At the end of the conversation, respond with 
 "For more details, refer to my profile at https://www.linkedin.com/in/sundarkp/"."""
 
+
+hide_github_icon = """
+#GithubIcon {
+  visibility: hidden;
+}
+"""
+
 pinecone_key = st.secrets["PINECONE_API_KEY"]
 pc = Pinecone(api_key=pinecone_key)
 OpenAI_Key = st.secrets["OPENAI_API_KEY"]
 index = pc.Index("skpllmindex2")
+
+
 
 def run_once(f):
     def wrapper(*args, **kwargs):
@@ -146,6 +155,8 @@ def chat_with_llm(context_documents,query):
 
 if __name__== "__main__":
     st.set_page_config(page_title="Sundarkp's Profile")
+    st.markdown(hide_github_icon, unsafe_allow_html=True)
+    
     st.header("What has Sundarkp worked on?")
     st.subheader("An attempt to know with RAG powered by LLM")
 
