@@ -14,7 +14,7 @@ The application can be seen working at https://sundarkp.streamlit.com/ (A little
 
 **High Level Design**
   
-  <img src="../Images/RAG.png">
+  <img src="./RAG.png">
 
 **Concept** 
 
